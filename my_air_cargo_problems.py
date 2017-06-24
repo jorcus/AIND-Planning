@@ -122,8 +122,12 @@ class AirCargoProblem(Problem):
             e.g. 'FTTTFF'
         :return: list of Action objects
         """
-        # TODO implement
         possible_actions = []
+        kb = PropKB()
+        kb.tell(decode_state(state, self.state_map).pos_sentence())
+        for action in self.actions_list:
+            if action.check_precond(kb, action.args):
+                possible_actions.append(action)
         return possible_actions
 
     def result(self, state: str, action: Action):
@@ -135,8 +139,11 @@ class AirCargoProblem(Problem):
         :param action: Action applied
         :return: resulting state after action
         """
-        # TODO implement
-        new_state = FluentState([], [])
+        new_state = decode_state(state, self.state_map)
+        kb = PropKB()
+        kb.tell(new_state.sentence())
+        action.act(kb, action.args)
+        new_state = FluentState(kb.clauses, [])
         return encode_state(new_state, self.state_map)
 
     def goal_test(self, state: str) -> bool:
@@ -178,6 +185,11 @@ class AirCargoProblem(Problem):
         """
         # TODO implement (see Russell-Norvig Ed-3 10.2.3  or Russell-Norvig Ed-2 11.2)
         count = 0
+        kb = PropKB()
+        kb.tell(decode_state(node.state, self.state_map).pos_sentence())
+        for clause in self.goal:
+            if clause not in kb.clauses:
+                count += 1
         return count
 
 
@@ -279,12 +291,12 @@ def air_cargo_p3() -> AirCargoProblem:
     planes = ['P1', 'P2']
     airports = ['JFK', 'SFO', 'ATL', 'ORD']
     # List the location of cargo and planes
-    pos = [expr('AT(C1, SFO)'),
-           expr('AT(C2, JFK)'),
-           expr('AT(C3, ATL)'),
-           expr('AT(C4, ORD)'),
-           expr('AT(P1, SFO)'),
-           expr('AT(P2, JFK)'),
+    pos = [expr('At(C1, SFO)'),
+           expr('At(C2, JFK)'),
+           expr('At(C3, ATL)'),
+           expr('At(C4, ORD)'),
+           expr('At(P1, SFO)'),
+           expr('At(P2, JFK)'),
            ]
     # List the cargo that haven't listed in any planes yet
     neg = [expr('At(C2, SFO)'),

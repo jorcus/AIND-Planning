@@ -200,7 +200,7 @@ def mutexify(node1: PgNode, node2: PgNode):
 class PlanningGraph():
     """
     A planning graph as described in chapter 10 of the AIMA text. The planning
-    graph can be used to reason about 
+    graph can be used to reason about
     """
 
     def __init__(self, problem: Problem, state: str, serial_planning=True):
@@ -311,6 +311,15 @@ class PlanningGraph():
         #   to see if a proposed PgNode_a has prenodes that are a subset of the previous S level.  Once an
         #   action node is added, it MUST be connected to the S node instances in the appropriate s_level set.
 
+        self.a_levels.append(set()) # Initial with empty set
+        for action in self.all_actions:
+            node_a = PgNode_a(action)
+            if set(node_a.prenodes).issubset(self.s_levels[level]):
+                for s in [s for s in self.s_levels[level] if s in node_a.prenodes]:
+                    self.a_levels[level].add(node_a)
+                    s.children.add(node_a)
+                    node_a.parents.add(s)
+
     def add_literal_level(self, level):
         """ add an S (literal) level to the Planning Graph
 
@@ -328,6 +337,13 @@ class PlanningGraph():
         #   may be "added" to the set without fear of duplication.  However, it is important to then correctly create and connect
         #   all of the new S nodes as children of all the A nodes that could produce them, and likewise add the A nodes to the
         #   parent sets of the S nodes
+
+        self.s_levels.append(set()) # Initial with empty set
+        for node_a in self.a_levels[level-1]:
+            for node_s in node_a.effnodes:
+                self.s_levels[level].add(node_s)
+                node_a.children.add(node_s)
+                node_a.parents.add(node_a)
 
     def update_a_mutex(self, nodeset):
         """ Determine and update sibling mutual exclusion for A-level nodes
@@ -390,7 +406,7 @@ class PlanningGraph():
 
     def interference_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
         """
-        Test a pair of actions for mutual exclusion, returning True if the 
+        Test a pair of actions for mutual exclusion, returning True if the
         effect of one action is the negation of a precondition of the other.
 
         HINT: The Action instance associated with an action node is accessible
