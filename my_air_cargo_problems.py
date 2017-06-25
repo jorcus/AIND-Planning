@@ -62,7 +62,7 @@ class AirCargoProblem(Problem):
             for airport in self.airports:
                 for plane in self.planes:
                     for cargo in self.cargos:
-                        precond_pos = [expr("AT({}, {})".format(cargo, airport)), expr("AT({}, {})".format(plane, airport))]
+                        precond_pos = [expr("At({}, {})".format(cargo, airport)), expr("At({}, {})".format(plane, airport))]
                         precond_neg = []
                         effect_add = [expr("In({}, {})".format(cargo, plane))]
                         effect_rem = [expr("At({}, {})".format(cargo, airport))]

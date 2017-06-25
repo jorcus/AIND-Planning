@@ -420,6 +420,7 @@ class PlanningGraph():
         :return: bool
         """
         # TODO test for Interference between nodes
+        return (set(node_a1.action.effect_add) & set(node_a2.action.precond_neg) |
                 set(node_a2.action.effect_add) & set(node_a1.action.precond_neg) |
                 set(node_a1.action.effect_rem) & set(node_a2.action.precond_pos) |
                 set(node_a2.action.effect_rem) & set(node_a1.action.precond_pos))
